@@ -1,0 +1,17 @@
+# This is a basic workflow that is manually triggered
+
+name: Cypress test in GitHub Action
+on: [push]
+
+jobs:
+  my_job:
+    name: deploy to staging
+    runs-on: ubuntu-18.04
+    steps:
+      — name: Checkout
+        uses: actions/checkout@v1
+
+      – name: cyress test cases
+        uses: cypress-io/github-action@v2.9.7
+        with:
+          start: npm start

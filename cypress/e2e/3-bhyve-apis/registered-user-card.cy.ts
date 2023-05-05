@@ -1,5 +1,5 @@
-import {braintreeQuery} from "../fixtures/braintreeQuery"
-import mockCreditCard from "../fixtures/mockCreditCard.json"
+import {braintreeQuery} from "../../fixtures/braintreeQuery"
+import mockCreditCard from "../../fixtures/mockCreditCard.json"
 
 describe('template spec', () => {
   const storeID: any = 946
@@ -11,6 +11,7 @@ describe('template spec', () => {
   let totalCost: any
   let paymentToken: any
   let paymentNonce: any
+  let orderNo: any
 
   it('Sign In (signInUser)', () => {
     cy.api("POST", "https://api-external.staging.apps.gyg.com.au/staging/auth/signin", {
@@ -166,7 +167,25 @@ describe('template spec', () => {
       expect(response.status).to.eq(200);
       expect(response.body.order).to.have.property('orderNumber')
       expect(response.body.order).to.have.property('orderId')
+    }).its('body').then((body) => {
+      cy.wrap(body.order.orderNumber).as('orderNumber')
+    });
+
+    cy.get('@orderNumber').then((orderNumber) => {
+      orderNo = orderNumber
+    })
+  })
+
+  it('Confirm Order Has Been Placed (getOrders)', () => {
+    cy.api({
+      url: 'https://api-external.staging.apps.gyg.com.au/staging/orders',
+      headers: {
+        Authorization: userAuth
+      },
+      method: 'GET'
+    }).should((response) => {
+      expect(response.status).to.eq(200);
+      expect(response.body[0].order.orderNumber).equal(orderNo)
     });
   })
 })
-//Test

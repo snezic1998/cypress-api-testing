@@ -1,17 +1,11 @@
-# This is a basic workflow that is manually triggered
-
-name: Cypress test in GitHub Action
-on: [push]
-
+name: Chrome
+on: push
 jobs:
-  my_job:
-    name: deploy to staging
-    runs-on: ubuntu-18.04
+  chrome:
+    runs-on: ubuntu-22.04
+    name: E2E on Chrome
     steps:
-      — name: Checkout
-        uses: actions/checkout@v1
-
-      – name: cyress test cases
-        uses: cypress-io/github-action@v2.9.7
+      - uses: actions/checkout@v3
+      - uses: cypress-io/github-action@v5
         with:
-          start: npm start
+          browser: chrome

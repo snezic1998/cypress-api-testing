@@ -1,0 +1,22 @@
+{       
+    "input": {
+        "creditCard": {
+            "number": "4111111111111111",
+            "expirationYear": "2022",
+            "expirationMonth": "09",
+            "cvv": "411",
+            "cardholderName": "Test",
+            "billingAddress": {
+                "company": "DummyCorpo",
+                "streetAddress": "streetAddress",
+                "extendedAddress": "extendedAddres",
+                "firstName": "Test man",
+                "lastName": "Lastname",
+                "locality": "South morang",
+                "region": "Victorua",
+                "postalCode": "3122",
+                "countryCode": "AUS"
+            }
+        }
+    }
+ }    

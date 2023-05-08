@@ -1,18 +1,16 @@
-import {braintreeQuery} from "../../fixtures/braintreeQuery"
+import { braintreeQuery } from "../../fixtures/braintreeQuery"
 import mockCreditCard from "../../fixtures/mockCreditCard.json"
 
 describe('template spec', () => {
   const storeID: any = 946
   const productName: any = "Slow Cooked Beef Burrito (Mild)"
   const productId: any = 50
-  const gygDollar: any = 5
+  const time: any = 4
   let userAuth: any
   let userCard: any
   let posMenuId: any
   let orderId: any
   let totalCost: any
-  let paymentToken: any
-  let paymentNonce: any
   let orderNo: any
 
   it('Sign In (signInUser)', () => {
@@ -67,7 +65,8 @@ describe('template spec', () => {
   })
 
   it('Create New Order for Registered User (createOrder)', () => {
-    const currentTime: any = new Date()
+    let currentTime: any = new Date()
+    currentTime = currentTime.setHours(currentTime.getHours() + time)
 
     cy.api({
       url: 'https://api-external.staging.apps.gyg.com.au/staging/orders',
@@ -80,7 +79,6 @@ describe('template spec', () => {
         collectionType: "PICKUP",
         posMenuId: posMenuId,
         pickUpTime: currentTime,
-        redeemedGygDollars: gygDollar,
         basketItems: [{
           id: productId,
           name: productName,
@@ -111,48 +109,6 @@ describe('template spec', () => {
     })
   })
 
-  it('Get Payment Token From Braintree (getPaymentTokenFromBraintree)', () => {
-    cy.api({
-      url: 'https://api-external.staging.apps.gyg.com.au/staging/orders/' + orderId + '/accesstoken',
-      headers: {
-        Authorization: userAuth,
-        "Cache-Control": "no-cache"
-      },
-      method: 'GET'
-    }).should((response) => {
-      expect(response.status).to.eq(200);
-    }).its('body').then((body) => {
-      cy.wrap(body.clientToken).as('clientToken')
-    });
-
-    cy.get('@clientToken').then((clientToken) => {
-      paymentToken = clientToken
-    })
-  })
-
-  it('Insert Mock Credit Card Details into GraphQL (insertMockCreditCardDetails)', () => {
-    cy.api({
-      url: 'https://payments.sandbox.braintree-api.com/graphql',
-      headers: {
-        Authorization: "Basic d3hxZ3pqZnRxZnhkcnBmczpkNjA5NWQ4Y2VhYTVjZjE2NWNiYzUxNDNmMDI5YTIzNw==",
-        "Braintree-Version": "2019-01-01"
-      },
-      method: 'POST',
-      body: {
-        query: braintreeQuery,
-        variables: mockCreditCard
-      }
-    }).should((response) => {
-      expect(response.status).to.eq(200);
-    }).its('body').then((body) => {
-      cy.wrap(body.data.tokenizeCreditCard.paymentMethod.id).as('nonce')
-    });
-
-    cy.get('@nonce').then((nonce) => {
-      paymentNonce = nonce
-    })
-  })
-
   it('Complete Checkout Order (createCheckout)', () => {
     cy.api({
       url: 'https://api-external.staging.apps.gyg.com.au/staging/orders/' + orderId + '/checkout',
@@ -165,14 +121,7 @@ describe('template spec', () => {
         payment: {
           gygDollar: {
             cardNumber: userCard,
-            amount: gygDollar
-        },
-          braintree: {
-            nonce: paymentNonce,
-            amount: (totalCost - gygDollar),
-            paymentToken: paymentToken,
-            checkoutType: 0,
-            storeCard: false
+            amount: totalCost
           }
         }
       }
